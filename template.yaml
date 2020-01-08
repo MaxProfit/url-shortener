@@ -1,0 +1,83 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: 'Template to deploy a URL shortener app with SAM on AWS'
+Globals:
+  Function:
+      Runtime: python3.7
+      MemorySize: 3008
+      CodeUri: ./lambda
+      Environment:
+        Variables:
+          TABLE_NAME: LinkTable
+          PRIMARY_KEY: ShortUrl
+          POINTS_TO: Link
+Resources:
+  CreateFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: This lambda does a thing
+      FunctionName: CreateFunction
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - DynamoDBCrudPolicy:
+            TableName:
+              LinkTable
+      Events:
+        ApiEvent:
+          Properties:
+            Method: post
+            Path: /{name}
+            RestApiId:
+              Ref: ApiGatewayApi
+          Type: Api
+      Handler: create.lambda_handler
+      Tags:
+        Author: Matthew Williams
+        ProjectName: UrlShortener
+    
+  SearchFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: This lambda does a thing
+      FunctionName: SearchFunction
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - DynamoDBReadPolicy:
+            TableName:
+              LinkTable
+      Events:
+        ApiEvent:
+          Properties:
+            Method: get
+            Path: /{name}
+            RestApiId:
+              Ref: ApiGatewayApi
+          Type: Api
+      Handler: search.lambda_handler
+      Tags:
+        Author: Matthew Williams
+        ProjectName: UrlShortener
+    
+  ApiGatewayApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Name: UrlApi
+      EndpointConfiguration: EDGE
+      Cors: "'bubb.surf'"
+      Tags:
+        Author: Matthew Williams
+        ProjectName: UrlShortener
+  TableThing:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: ShortUrl
+        Type: String
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+      TableName: LinkTable
+      Tags:
+        Author: Matthew Williams
+        ProjectName: UrlShortener
