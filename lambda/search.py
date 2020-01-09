@@ -5,7 +5,7 @@ import os
 
 client = boto3.client('dynamodb')
 
-def create_return_value(success, name=None, link=None):
+def create_return_value(success, name, link=None):
     if success:
         return {
             'statusCode': 301,
@@ -15,8 +15,8 @@ def create_return_value(success, name=None, link=None):
         }
     else:
         return {
-            'statusCode': 409,
-            'body': json.dumps("{} already exists in the database!".format(name))
+            'statusCode': 404,
+            'body': json.dumps("{} doesn't exist in the database!".format(name))
         }
 
 def return_url(name):
@@ -37,4 +37,5 @@ def return_url(name):
         return create_return_value(False, name)
 
 def lambda_handler(event, context):
-    return return_url(event["pathParameters"]["name"])
+    name = event["pathParameters"]["name"]
+    return return_url(name)

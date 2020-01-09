@@ -6,7 +6,7 @@ import os
 
 client = boto3.client('dynamodb')
 
-def create_return_value(success, name=None):
+def create_return_value(success, name):
     if success:
         return {
             'statusCode': 200,
@@ -39,7 +39,7 @@ def create_item(name, link):
     
 def check_exists(name):
     try:
-        resp = client.get_item(
+        response = client.get_item(
             TableName=os.environ["TABLE_NAME"],
             Key={
                 os.environ["PRIMARY_KEY"]: {
@@ -48,14 +48,12 @@ def check_exists(name):
             }
         )
 
-        try_this = resp["Item"]
-        print(try_this)
+        # Checks if it exists in the response
+        if 'Item' not in response:
+            return False
 
     except ClientError as e:
         print(e.response["Error"]["Message"])
-        return False
-    except KeyError:
-        print("KeyError")
         return False
     return True
 
@@ -70,7 +68,9 @@ def create_named(name, link):
         return create_item(name, link)
 
 def lambda_handler(event, context):
+    link = event["body"]
     if event["pathParameters"] is None:
-        return create_random(event["body"])
+        return create_random(link)
     else:
-        return create_named(event["pathParameters"]["name"], event["body"])
+        name = event["pathParameters"]["name"]
+        return create_named(name, link)
