@@ -15,7 +15,7 @@ Resources:
   CreateFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Description: This lambda does a thing
+      Description: This lambda creates the url and puts it in the database
       FunctionName: CreateFunction
       Policies:
         - AWSLambdaBasicExecutionRole
@@ -38,7 +38,7 @@ Resources:
   SearchFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Description: This lambda does a thing
+      Description: This lambda returns the url that the url points to
       FunctionName: SearchFunction
       Policies:
         - AWSLambdaBasicExecutionRole
@@ -63,7 +63,7 @@ Resources:
       StageName: Prod
       Name: UrlApi
       EndpointConfiguration: EDGE
-      Cors: "'bubb.surf'"
+      Cors: "'*'"
       Tags:
         Author: Matthew Williams
         ProjectName: UrlShortener

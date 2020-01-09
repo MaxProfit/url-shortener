@@ -10,11 +10,19 @@ def create_return_value(success, name):
     if success:
         return {
             'statusCode': 200,
-            'body': json.dumps("Success!")
+            'headers': {
+                "Access-Control-Allow-Origin" : "*", # Required for CORS support to work
+                "Access-Control-Allow-Credentials" : True # Required for cookies, authorization headers with HTTPS 
+            },
+            'body': json.dumps("Success! {} was added to the database".format(name))
         }
     else:
         return {
             'statusCode': 409,
+            'headers': {
+                "Access-Control-Allow-Origin" : "*", # Required for CORS support to work
+                "Access-Control-Allow-Credentials" : True # Required for cookies, authorization headers with HTTPS 
+            },
             'body': json.dumps("{} already exists in the database!".format(name))
         }
 

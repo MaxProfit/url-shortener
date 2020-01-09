@@ -11,9 +11,6 @@ cloudformation.
 
 ### Usage
 
-Contributing
-
-
 ### Deployment
 
 Here's how to deploy the stack that contains this cloudformation template
@@ -29,5 +26,3 @@ This project utilizes the following technologies:
 * REST Api
 * HTTP Headers
 * HTTP Status Codes
-
-License

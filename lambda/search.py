@@ -10,12 +10,18 @@ def create_return_value(success, name, link=None):
         return {
             'statusCode': 301,
             'headers': {
-                "Location": link
+                "Location": link,
+                "Access-Control-Allow-Origin" : "*", # Required for CORS support to work
+                "Access-Control-Allow-Credentials" : True # Required for cookies, authorization headers with HTTPS 
             }
         }
     else:
         return {
             'statusCode': 404,
+            'headers': {
+                "Access-Control-Allow-Origin" : "*", # Required for CORS support to work
+                "Access-Control-Allow-Credentials" : True # Required for cookies, authorization headers with HTTPS 
+            },
             'body': json.dumps("{} doesn't exist in the database!".format(name))
         }
 
