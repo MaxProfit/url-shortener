@@ -56,7 +56,28 @@ Resources:
       Tags:
         Author: Matthew Williams
         ProjectName: UrlShortener
-    
+  CreateFunctionTheSecond:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: This lambda creates the url and puts it in the database
+      FunctionName: CreateFunctionTheSecond
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - DynamoDBCrudPolicy:
+            TableName:
+              LinkTable
+      Events:
+        ApiEvent:
+          Properties:
+            Method: post
+            Path: /
+            RestApiId:
+              Ref: ApiGatewayApi
+          Type: Api
+      Handler: create.lambda_handler
+      Tags:
+        Author: Matthew Williams
+        ProjectName: UrlShortener    
   SearchFunction:
     Type: AWS::Serverless::Function
     Properties:
