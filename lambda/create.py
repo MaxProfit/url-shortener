@@ -6,27 +6,16 @@ import os
 
 client = boto3.client('dynamodb')
 
-def create_return_value(success, name):
-    if success:
-        return {
-            'statusCode': 200,
-            'headers': {
-                "Access-Control-Allow-Origin" : "*", # Required for CORS support to work
-                "Access-Control-Allow-Credentials" : True, # Required for cookies, authorization headers with HTTPS
-                "Content-Type": "application/json"
-            },
-            'body': json.dumps("Success! {} was added to the database".format(name))
-        }
-    else:
-        return {
-            'statusCode': 409,
-            'headers': {
-                "Access-Control-Allow-Origin" : "*", # Required for CORS support to work
-                "Access-Control-Allow-Credentials" : True, # Required for cookies, authorization headers with HTTPS
-                "Content-Type": "application/json"
-            },
-            'body': json.dumps("{} already exists in the database!".format(name))
-        }
+def create_lambda_proxy_response(status_code, response_string):
+    return {
+        'statusCode': status_code,
+        'headers': {
+            'Access-Control-Allow-Origin' : '*', # Required for CORS support to work
+            'Access-Control-Allow-Credentials' : True, # Required for cookies, authorization headers with HTTPS
+            'Content-Type': 'application/json'
+        },
+        'body': json.dumps(response_string)
+    }
 
 def create_item(name, link):
     try:
@@ -42,10 +31,10 @@ def create_item(name, link):
             }
         )
 
-        return create_return_value(True, name)
+        return create_lambda_proxy_response(200, "Success! {} was added to the database".format(name))
     except ClientError as e:
         print(e.response["Error"]["Message"])
-        return create_return_value(False, name)
+        return create_lambda_proxy_response(500, "Seems to be a server error... logging!")
     
 def check_exists(name):
     try:
@@ -73,17 +62,24 @@ def create_random(link):
 
 def create_named(name, link):
     if check_exists(name):
-        return create_return_value(False, name)
+        return create_lambda_proxy_response(409, "{} already exists in the database!".format(name))
     else:
         return create_item(name, link)
 
 def lambda_handler(event, context):
-    link = event["body"]
+    try:
+        body_json = json.loads(event["body"])
+        if "link" not in body_json:
+            return create_lambda_proxy_response(400, "You need to format your body as a \"link\": \"(Destination)\"")
 
-    if ("pathParameters" not in event or
-        event["pathParameters"] is None or
-        "name" not in event["pathParameters"]):
-        return create_random(link)
-    else:
-        name = event["pathParameters"]["name"]
-        return create_named(name, link)
+        link = body_json["link"]
+        if ("pathParameters" not in event or
+            event["pathParameters"] is None or
+            "name" not in event["pathParameters"]):
+            return create_random(link)
+        else:
+            name = event["pathParameters"]["name"]
+            return create_named(name, link)
+    except json.JSONDecodeError:
+        return create_lambda_proxy_response(400, "You need to format your body as json with structure of \"link\": \"(Destination)\"")
+
