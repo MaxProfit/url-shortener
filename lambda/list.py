@@ -5,49 +5,42 @@ import os
 
 client = boto3.client('dynamodb')
 
-def create_return_value(success, name, link=None):
+def create_return_value(success, url_dict=None):
     if success:
         return {
-            'statusCode': 301,
-            'headers': {
-                "Location": link,
-                "Access-Control-Allow-Origin" : "*", # Required for CORS support to work
-                "Access-Control-Allow-Credentials" : True, # Required for cookies, authorization headers with HTTPS
-                "Content-Type": "application/json"
-            }
-        }
-    else:
-        return {
-            'statusCode': 404,
+            'statusCode': 200,
             'headers': {
                 "Access-Control-Allow-Origin" : "*", # Required for CORS support to work
                 "Access-Control-Allow-Credentials" : True, # Required for cookies, authorization headers with HTTPS
                 "Content-Type": "application/json"
             },
-            'body': json.dumps("{} doesn't exist in the database!".format(name))
+            'body': json.dumps(url_dict)
+        }
+    else:
+        return {
+            'statusCode': 500,
+            'headers': {
+                "Access-Control-Allow-Origin" : "*", # Required for CORS support to work
+                "Access-Control-Allow-Credentials" : True, # Required for cookies, authorization headers with HTTPS
+                "Content-Type": "application/json"
+            },
+            'body': json.dumps("Internal Server Error")
         }
 
-def return_url(name):
+
+def get_list():
     try:
-        response = client.get_item(
-            TableName=os.environ["TABLE_NAME"],
-            Key={
-                os.environ["PRIMARY_KEY"]: {
-                    'S': name
-                }
-            }
+        response = client.scan(
+            TableName=os.environ["TABLE_NAME"]
         )
 
-        link = response["Item"][os.environ["POINTS_TO"]]["S"]
-        return create_return_value(True, name, link)
+        url_dict = {item["ShortUrl"]["S"]:item["Link"]["S"] for item in response["Items"]}
+
+        return create_return_value(True, url_dict)
+
     except ClientError as e:
         print(e.response["Error"]["Message"])
-        return create_return_value(False, name)
+        return create_return_value(False)
 
 def lambda_handler(event, context):
-    if ("pathParameters" not in event or
-        event["pathParameters"] is None or
-        "name" not in event["pathParameters"]):
-        return create_return_value(False, "Root")
-    name = event["pathParameters"]["name"]
-    return return_url(name)
+    return get_list()

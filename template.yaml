@@ -12,6 +12,28 @@ Globals:
           PRIMARY_KEY: ShortUrl
           POINTS_TO: Link
 Resources:
+  ListFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: This lambda lists all of the urls that have been added
+      FunctionName: ListFunction
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - DynamoDBReadPolicy:
+            TableName:
+              LinkTable
+      Events:
+        ApiEvent:
+          Properties:
+            Method: get
+            Path: /list-all
+            RestApiId:
+              Ref: ApiGatewayApi
+          Type: Api
+      Handler: list.lambda_handler
+      Tags:
+        Author: Matthew Williams
+        ProjectName: UrlShortener
   CreateFunction:
     Type: AWS::Serverless::Function
     Properties:

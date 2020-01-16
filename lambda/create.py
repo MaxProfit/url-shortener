@@ -12,7 +12,8 @@ def create_return_value(success, name):
             'statusCode': 200,
             'headers': {
                 "Access-Control-Allow-Origin" : "*", # Required for CORS support to work
-                "Access-Control-Allow-Credentials" : True # Required for cookies, authorization headers with HTTPS 
+                "Access-Control-Allow-Credentials" : True, # Required for cookies, authorization headers with HTTPS
+                "Content-Type": "application/json"
             },
             'body': json.dumps("Success! {} was added to the database".format(name))
         }
@@ -21,7 +22,8 @@ def create_return_value(success, name):
             'statusCode': 409,
             'headers': {
                 "Access-Control-Allow-Origin" : "*", # Required for CORS support to work
-                "Access-Control-Allow-Credentials" : True # Required for cookies, authorization headers with HTTPS 
+                "Access-Control-Allow-Credentials" : True, # Required for cookies, authorization headers with HTTPS
+                "Content-Type": "application/json"
             },
             'body': json.dumps("{} already exists in the database!".format(name))
         }
@@ -77,7 +79,10 @@ def create_named(name, link):
 
 def lambda_handler(event, context):
     link = event["body"]
-    if event["pathParameters"] is None:
+
+    if ("pathParameters" not in event or
+        event["pathParameters"] is None or
+        "name" not in event["pathParameters"]):
         return create_random(link)
     else:
         name = event["pathParameters"]["name"]
