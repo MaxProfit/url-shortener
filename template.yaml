@@ -8,7 +8,7 @@ Globals:
       CodeUri: ./lambda
       Environment:
         Variables:
-          TABLE_NAME: LinkTable
+          TABLE_NAME: UrlShortener-LinkTable
           PRIMARY_KEY: ShortUrl
           POINTS_TO: Link
 Resources:
@@ -16,12 +16,12 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Description: This lambda lists all of the urls that have been added
-      FunctionName: ListFunction
+      FunctionName: UrlShortener-ListFunction
       Policies:
         - AWSLambdaBasicExecutionRole
         - DynamoDBReadPolicy:
             TableName:
-              LinkTable
+              UrlShortener-LinkTable
       Events:
         ApiEvent:
           Properties:
@@ -38,12 +38,12 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Description: This lambda creates the url and puts it in the database
-      FunctionName: CreateFunction
+      FunctionName: UrlShortener-CreateFunction
       Policies:
         - AWSLambdaBasicExecutionRole
         - DynamoDBCrudPolicy:
             TableName:
-              LinkTable
+              UrlShortener-LinkTable
       Events:
         ApiEvent:
           Properties:
@@ -60,12 +60,12 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Description: This lambda creates the url and puts it in the database
-      FunctionName: CreateFunctionTheSecond
+      FunctionName: UrlShortener-CreateFunctionTheSecond
       Policies:
         - AWSLambdaBasicExecutionRole
         - DynamoDBCrudPolicy:
             TableName:
-              LinkTable
+              UrlShortener-LinkTable
       Events:
         ApiEvent:
           Properties:
@@ -82,12 +82,12 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Description: This lambda returns the url that the url points to
-      FunctionName: SearchFunction
+      FunctionName: UrlShortener-SearchFunction
       Policies:
         - AWSLambdaBasicExecutionRole
         - DynamoDBReadPolicy:
             TableName:
-              LinkTable
+              UrlShortener-LinkTable
       Events:
         ApiEvent:
           Properties:
@@ -119,7 +119,7 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
-      TableName: LinkTable
+      TableName: UrlShortener-LinkTable
       Tags:
         Author: Matthew Williams
         ProjectName: UrlShortener
